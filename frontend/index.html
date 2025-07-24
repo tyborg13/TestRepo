@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess Analyzer</title>
+    <script>
+        async function importGames(source) {
+            const username = document.getElementById(source + '-user').value;
+            const response = await fetch(`/import/${source}/` + username);
+            const data = await response.json();
+            alert(`Imported ${data.games_imported} games from ${source}`);
+        }
+
+        async function analyzeGames() {
+            const textarea = document.getElementById('pgn-input');
+            const pgnList = textarea.value.split(/\n\s*\n/); // split on blank lines
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({pgn_list: pgnList})
+            });
+            const data = await response.json();
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</head>
+<body>
+    <h1>Chess Analyzer</h1>
+
+    <section>
+        <h2>Import Games</h2>
+        <div>
+            <label>Lichess Username:</label>
+            <input id="lichess-user" type="text">
+            <button onclick="importGames('lichess')">Import</button>
+        </div>
+        <div>
+            <label>Chess.com Username:</label>
+            <input id="chesscom-user" type="text">
+            <button onclick="importGames('chesscom')">Import</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>Analyze PGN</h2>
+        <textarea id="pgn-input" rows="10" cols="80" placeholder="Paste PGN here..."></textarea>
+        <br>
+        <button onclick="analyzeGames()">Analyze</button>
+        <pre id="result"></pre>
+    </section>
+</body>
+</html>
